@@ -1,0 +1,24 @@
+.SymptomsPanel {
+  display: block;
+  padding-left: 20px;
+}
+
+.selection {
+  margin: 5px;
+  align-content: left;
+  display: flex;
+}
+
+.selection-title {
+  display: inline-block;
+  width: 150px;
+  text-align: left;
+}
+
+.radio-button-group {
+  display: inline-flex;
+}
+
+.radio-button {
+  width: auto;
+}
