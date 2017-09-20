@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { FlatButton, RaisedButton } from 'material-ui';
 
-// import * as styles from './ResultPanel.scss';
+// import * as styles from './ConfirmPanel.scss';
 
 interface Props {
   onBackClicked?: () => void;
   onNextClicked?: () => void;
 }
 
-class ResultPanel extends React.Component<Props> {
+class ConfirmPanel extends React.Component<Props> {
   render() {
     return (
       <div>
@@ -28,4 +28,4 @@ class ResultPanel extends React.Component<Props> {
   }
 }
 
-export default ResultPanel;
+export default ConfirmPanel;

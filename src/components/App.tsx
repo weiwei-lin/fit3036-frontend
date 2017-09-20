@@ -7,16 +7,43 @@ import { observer } from 'mobx-react';
 import { store } from '../models/Store';
 import SymptomsPanel from './SymptomsPanel';
 import ResultPanel from './ResultPanel';
+import ConfirmPanel from './ConfirmPanel';
 import * as styles from './App.scss';
 
+interface State {
+  stepIndex: number;
+}
+
 @observer
-class App extends React.Component {
-  private static readonly panels = [
-    <SymptomsPanel key={'symptom-panel'} />,
-    <ResultPanel key={'result-panel'} />
+class App extends React.Component<{}, State> {
+  private readonly panels = [
+    (
+      <SymptomsPanel
+        key={'symptom-panel'}
+        onNextClicked={() => this.setState({stepIndex: 1})}
+      />
+    ),
+    (
+      <ResultPanel
+        key={'result-panel'}
+        onBackClicked={() => this.setState({stepIndex: 0})}
+        onNextClicked={() => this.setState({stepIndex: 2})}
+      />
+    ),
+    (
+      <ConfirmPanel
+        key={'confirm-panel'}
+        onBackClicked={() => this.setState({stepIndex: 1})}
+      />
+    )
   ];
 
-  render() {
+  public constructor(props: {}) {
+    super(props);
+    this.state = {stepIndex: 0};
+  }
+
+  public render() {
     return (
       <div
         className={classnames(
@@ -44,7 +71,7 @@ class App extends React.Component {
           />
         </Drawer>
         <div className={styles.content}>
-          <Stepper activeStep={0}>
+          <Stepper activeStep={this.state.stepIndex}>
             <Step>
               <StepLabel>Enter Symptoms</StepLabel>
             </Step>
@@ -55,9 +82,7 @@ class App extends React.Component {
               <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {
-            App.panels[0]
-          }
+          {this.panels[this.state.stepIndex]}
         </div>
       </div>
     );

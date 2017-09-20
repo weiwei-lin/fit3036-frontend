@@ -15,16 +15,11 @@ export class Store {
   @computed public get drawerIsOpen() { return this._drawerIsOpen; }
 
   public constructor() {
-    console.log(this);
-
     // run scheduled actions in every other tick
     autorun(
       () => {
         for (const actionItem of this.actionQueue) {
           actionItem();
-        }
-        if (this.actionQueue.length !== 0) {
-          console.log(this);
         }
         this.actionQueue = [];
       }
