@@ -1,42 +1,78 @@
+import * as querystring from 'querystring';
+
 import * as React from 'react';
+import { observable, computed, action } from 'mobx';
+import { observer } from 'mobx-react';
 import { RadioButton, RadioButtonGroup, RaisedButton, FlatButton } from 'material-ui';
 
 import * as styles from './SymptomsPanel.scss';
 
 interface Props {
   onBackClicked?: () => void;
-  onNextClicked?: () => void;
+  onComplete: (data: {[key: string]: number}) => void;
 }
 
+@observer
 class SymptomsPanel extends React.Component<Props> {
-  private readonly symptoms = [
-    'Fever',
-    'Cough',
-    'Sore Throat',
-    'Runny/Stuffy Nose',
-    'Body/Muscle Ache',
-    'Headaches',
-    'Fatigue',
-    'Chill'
-  ];
+  private static readonly API_URL = 'http://127.0.0.1:5000/?';
+
+  private static readonly choiceLabelValueMap = {
+    'yes': 1,
+    'no': 0,
+    'not sure': -1
+  };
+
+  private static readonly symptomLabelValueMap = {
+    'fever': 'Fever',
+    'cough': 'Cough',
+    'sore-throat': 'Sore Throat',
+    'runny-nose': 'Runny Nose',
+    'body-ache': 'Body Ache',
+    'headaches': 'Headaches',
+    'fatigue': 'Fatigue',
+    'chill': 'Chill'
+  };
+
+  @observable private readonly symptoms = {
+    'fever': -1,
+    'cough': -1,
+    'sore-throat': -1,
+    'runny-nose': -1,
+    'body-ache': -1,
+    'headaches': -1,
+    'fatigue': -1,
+    'chill': -1,
+  };
+
+  @computed private get isReady(): boolean {
+    for (const key of Object.keys(this.symptoms)) {
+      if (this.symptoms[key] === -1) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   render() {
     return (
       <div className={styles.SymptomsPanel}>
         <div className={styles.selections}>
-          {this.symptoms.map((symptom) => (
+          {Object.keys(this.symptoms).map((symptom) => (
             <div key={symptom} className={styles.selection}>
-              <div className={styles.selectionTitle}>{symptom}</div>
+              <div className={styles.selectionTitle}>
+                {SymptomsPanel.symptomLabelValueMap[symptom]}
+              </div>
               <RadioButtonGroup
                 className={styles.radioButtonGroup}
                 name={symptom}
-                defaultSelected="not sure"
+                defaultSelected={this.symptoms[symptom]}
+                onChange={(event, value) => this.setSymptom(symptom, value)}
               >
                 {['yes', 'no', 'not sure'].map((option) => (
                   <RadioButton
                     key={option}
                     className={styles.radioButton}
-                    value={option}
+                    value={SymptomsPanel.choiceLabelValueMap[option]}
                     label={option}
                     style={{width: 'auto'}}
                     labelStyle={{width: 'fit-content'}}
@@ -54,13 +90,26 @@ class SymptomsPanel extends React.Component<Props> {
           />
           <RaisedButton
             label="Next"
-            onClick={this.props.onNextClicked}
-            disabled={this.props.onNextClicked === undefined}
+            onClick={this.onNextClicked}
+            disabled={!this.isReady}
             primary={true}
           />
         </div>
       </div>
     );
+  }
+
+  @action setSymptom = (symptom: string, value: string) => {
+    this.symptoms[symptom] = value;
+  }
+
+  private onNextClicked = () => {
+    const query = querystring.stringify(this.symptoms);
+    const url = SymptomsPanel.API_URL + query;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data: {yes: number, no: number}) => this.props.onComplete(data));
   }
 }
 

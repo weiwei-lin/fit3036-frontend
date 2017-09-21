@@ -9,7 +9,7 @@ export class Store {
 
   @observable.struct private _actionQueue: Array<() => void> = [];
   @computed private get actionQueue() { return this._actionQueue; }
-  private set actionQueue(actionQueue: Array<() => void>) { this._actionQueue = actionQueue; }
+  private set actionQueue(actionQueue) { this._actionQueue = actionQueue; }
 
   @observable private _drawerIsOpen = false;
   @computed public get drawerIsOpen() { return this._drawerIsOpen; }
