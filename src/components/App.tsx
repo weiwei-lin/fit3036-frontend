@@ -1,82 +1,59 @@
 import * as React from 'react';
-import { observable, computed } from 'mobx';
-import { observer } from 'mobx-react';
 import * as classnames from 'classnames';
+import { connect, Dispatch } from 'react-redux';
 import { AppBar, Drawer, MenuItem } from 'material-ui';
 import { Stepper, Step, StepLabel } from 'material-ui/Stepper';
 
-import { store } from '../models/Store';
+import { AnyAction, toggleDrawer, moveToStep } from '../actions';
+import { State } from '../reducer';
 import SymptomsPanel from './SymptomsPanel';
 import ResultPanel from './ResultPanel';
 import ConfirmPanel from './ConfirmPanel';
 import * as styles from './App.scss';
 
-@observer
-class App extends React.Component {
-  @observable private _stepIndex = 0;
-  @computed private get stepIndex() { return this._stepIndex; }
-  private set stepIndex(index) { this._stepIndex = index; }
+interface ReduxProps {
+  dispatch: Dispatch<AnyAction>;
+  stepIndex: number;
+  drawerIsOpen: boolean;
+}
 
-  @observable private _result: {[key: string]: number} = {};
-  @computed private get result() { return this._result; }
-  private set result(result) { this._result = result; }
-
-  @computed private get symptomPanel() {
-    return (
+class App extends React.Component<ReduxProps> {
+  private panels = [
+    (
       <SymptomsPanel
-        key={'symptom-panel'}
-        onComplete={(result) => {
-          this.result = result;
-          this.stepIndex = 1;
-        }}
+        onNext={() => this.props.dispatch(moveToStep(1))}
       />
-    );
-  }
-
-  @computed private get resultPanel() {
-    return (
+    ),
+    (
       <ResultPanel
-        key={'result-panel'}
-        result={this.result}
-        onBackClicked={() => this.stepIndex = 0}
-        onNextClicked={() => this.stepIndex = 2}
+        onBack={() => this.props.dispatch(moveToStep(0))}
+        onNext={() => this.props.dispatch(moveToStep(2))}
       />
-    );
-  }
-
-  @computed private get confirmPanel() {
-    return (
+    ),
+    (
       <ConfirmPanel
-        key={'confirm-panel'}
-        onBackClicked={() => this.stepIndex = 1}
+        onBack={() => this.props.dispatch(moveToStep(1))}
       />
-    );
-  }
-
-  @computed private get panels() {
-    return [
-      this.symptomPanel,
-      this.resultPanel,
-      this.confirmPanel
-    ];
-  }
+    )
+  ];
 
   public render() {
+    const {drawerIsOpen, stepIndex} = this.props;
     return (
       <div
         className={classnames(
           styles.app,
-          {[styles.drawerIsOpen]: store.drawerIsOpen}
+          {[styles.drawerIsOpen]: drawerIsOpen}
         )}
       >
         <AppBar
           className={styles.appBar}
-          title="Data Driven Diagnose"
-          onLeftIconButtonTouchTap={store.toogleDrawer}
+          title="Data Driven Diagnose (flu)"
+          onLeftIconButtonTouchTap={this.onDrawerButtonClick}
         />
         <Drawer
           className={styles.drawer}
-          open={store.drawerIsOpen}
+          open={drawerIsOpen}
         >
           <MenuItem
             primaryText="Diagnose"
@@ -89,7 +66,7 @@ class App extends React.Component {
           />
         </Drawer>
         <div className={styles.content}>
-          <Stepper activeStep={this.stepIndex}>
+          <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Enter Symptoms</StepLabel>
             </Step>
@@ -97,14 +74,21 @@ class App extends React.Component {
               <StepLabel>Diagnose Result</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Confirm</StepLabel>
+              <StepLabel>Confirm Result (optional)</StepLabel>
             </Step>
           </Stepper>
-          {this.panels[this.stepIndex]}
+          {this.panels[stepIndex]}
         </div>
       </div>
     );
   }
+
+  private onDrawerButtonClick = () => {
+    this.props.dispatch(toggleDrawer());
+  }
 }
 
-export default App;
+export default connect((state: State) => ({
+  stepIndex: state.diagnose.stepIndex,
+  drawerIsOpen: state.drawer.isOpen
+}))(App);

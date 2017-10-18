@@ -1,19 +1,24 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { MuiThemeProvider } from 'material-ui/styles';
-import * as mobx from 'mobx';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
 import App from './components/App';
+import { reduce } from './reducer';
 import registerServiceWorker from './registerServiceWorker';
 import './index.scss';
 
-mobx.useStrict(true);
+const store = createStore(reduce);
 
 ReactDOM.render(
-  <MuiThemeProvider>
-    <App />
-  </MuiThemeProvider>
-  ,
+  (
+    <Provider store={store} >
+      <MuiThemeProvider>
+        <App />
+      </MuiThemeProvider>
+    </Provider>
+  ),
   document.getElementById('root') as HTMLElement
 );
 registerServiceWorker();
