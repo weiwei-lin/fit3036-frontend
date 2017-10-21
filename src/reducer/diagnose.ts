@@ -9,7 +9,7 @@ export interface State {
   result: string | undefined;
 }
 
-const DEFAULT_STATE: State = {
+export const DEFAULT_STATE: State = {
   stepIndex: 0,
   symptoms: {},
   symptomMeta: {},

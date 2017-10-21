@@ -7,6 +7,11 @@ export interface State {
   drawer: drawer.State;
 }
 
+export const DEFAULT_STATE: State = {
+  diagnose: diagnose.DEFAULT_STATE,
+  drawer: drawer.DEFAULT_STATE
+};
+
 export const reduce = combineReducers<State>({
   diagnose: diagnose.reduce,
   drawer: drawer.reduce

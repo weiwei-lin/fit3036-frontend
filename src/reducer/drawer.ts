@@ -4,7 +4,7 @@ export interface State {
   isOpen: boolean;
 }
 
-const DEFAULT_STATE: State = {
+export const DEFAULT_STATE: State = {
   isOpen: false,
 };
 
